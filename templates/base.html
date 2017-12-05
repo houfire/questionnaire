@@ -1,0 +1,27 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    {% block my_css %}{% endblock my_css %}
+    <title>{% block title %}模板{% endblock title %}</title>
+</head>
+<body>
+
+
+<div class="container-fluid">
+    {% block content %}
+        模板主体
+    {% endblock content %}
+</div>
+
+
+<script src="{% static 'bootstrap/js/jquery-3.2.1.min.js' %}"></script>
+{% block my_js %}{% endblock my_js %}
+</body>
+</html>

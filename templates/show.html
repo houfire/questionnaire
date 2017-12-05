@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+        <tr>
+            <th>调查问卷名称</th>
+            <th>问卷调查班级</th>
+            <th>参与人数</th>
+            <th>编辑问卷</th>
+            <th>问卷URL</th>
+            <th>查看评分</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for naire in naire_list %}
+            <tr>
+                <td>{{ naire.title }}</td>
+                <td>{{ naire.classroom.caption }}</td>
+                <td>参与人数n/{{ naire.classroom.student_set.count }}</td>
+                <td><a href="javascript:void(0)">编辑</a></td>
+                <td><a href="javascript:void(0)">假装有url</a></td>
+                <td><a href="javascript:void(0)">查看评分</a></td>
+                <td><a href="javascript:void(0)">删除</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+{% endblock content %}
