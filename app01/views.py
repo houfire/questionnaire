@@ -1,4 +1,5 @@
 from django.shortcuts import render, reverse, redirect, HttpResponse
+from django.http import JsonResponse
 from  app01 import models
 
 
@@ -8,13 +9,13 @@ def index(request):
 
 def show(request):
     naire_list = models.Questionnaire.objects.all()
-    person_num = models.Answer.objects.filter().distinct().count()
     return render(request, 'show.html', {"naire_list": naire_list})
 
 
-def create(request):
-    return render(request, 'create.html')
-
-
-def edit(request):
+def edit(request, naire_id):
     return render(request, 'edit.html')
+
+
+def delete(request):
+    res_dict = {'status': None, 'error_msg': None}
+    return HttpResponse(JsonResponse(res_dict))

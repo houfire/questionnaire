@@ -21,7 +21,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
     url(r'^show/$', views.show, name='show'),
-    url(r'^create/$', views.create, name='create'),
-    url(r'^edit/$', views.edit, name='edit'),
+    url(r'^delete/$', views.delete, name='delete'),
+    url(r'^edit/(?P<naire_id>\d+)$', views.edit, name='edit'),
+
 
 ]
