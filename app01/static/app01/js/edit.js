@@ -1,1 +1,0 @@
-console.log('不小心自动commit到了git里');
