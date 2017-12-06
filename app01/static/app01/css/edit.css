@@ -1,0 +1,8 @@
+.glyphicon-remove:hover {
+    color: tomato;
+}
+
+.questionItem ul {
+    list-style: circle;
+    margin-left: 60px;
+}

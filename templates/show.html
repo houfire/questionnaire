@@ -1,47 +1,49 @@
-{% extends 'base.html' %}
-
-{% block my_css %}
-    {% load staticfiles %}
-    <link rel="stylesheet" href="{% static 'app01/css/show.css' %}">
-{% endblock my_css %}
-
-{% block title %}调查问卷列表{% endblock %}
-
-{% block content %}
-    <div>
-        <button class="btn btn-success" id="add">添加</button>
-    </div>
-    <table class="table table-bordered table-hover table-striped">
-        <thead>
-        <tr>
-            <th><input type="checkbox"></th>
-            <th>调查问卷名称</th>
-            <th>问卷调查班级</th>
-            <th>参与人数</th>
-            <th>问卷选项</th>
-            <th>问卷URL</th>
-            <th>查看评分</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for naire in naire_list %}
-            <tr>
-                <td><input type="checkbox"></td>
-                <td><a href="###">{{ naire.title }}</a></td>
-                <td>{{ naire.classroom.caption }}</td>
-                <td>{{ naire.question_set.first.answer_set.count }}/{{ naire.classroom.student_set.count }}</td>
-                <td><a href="{% url 'edit' naire.id %}">编辑问卷</a></td>
-                <td><a href="###">假装有url</a></td>
-                <td><a href="###">查看评分</a></td>
-                <td><a href="javascript:void(0)" onclick="del_naire({{ naire.id }})">删除</a></td>
-            </tr>
+{% load my_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>调查问卷</title>
+</head>
+<body>
+<h3>{{ questionnaire_obj.title }}</h3>
+<div class="tips">
+    <p>1.本班学生才能评价</p>
+    <p>2.学生只能对同一个问卷进行一次调查</p>
+    <form method="post">
+        {% for question in question_list %}
+            <div>
+                <b>{{ forloop.counter }}.{{ question.title }}</b>
+                <div>
+                    {% if question.type == 1 %}
+                        {% for i in 10|my_range %}
+                            &nbsp;&nbsp;&nbsp;
+                            <span>
+                                <label for="score_{{ i }}">{{ i }}</label>
+                                <input type="radio" name="score" value="{{ i }}" id="score_{{ i }}">
+                            </span>
+                        {% endfor %}
+                    {% elif question.type == 2 %}
+                        {% for option in question.option_set.all %}
+                            <span>
+                                <label for="value_{{ option.value }}">{{ option.content }}</label>
+                                <input type="radio" name="option" value="{{ option.value }}"
+                                       id="value_{{ option.value }}">
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        <span>
+                            <textarea name="" id="" cols="70" rows="8"></textarea>
+                        </span>
+                    {% endif %}
+                    <p></p>
+                </div>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
-
-{% endblock content %}
-
-{% block my_js %}
-    <script src="{% static 'app01/js/show.js' %}"></script>
-{% endblock my_js %}
+    </form>
+</div>
+</body>
+</html>

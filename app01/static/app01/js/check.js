@@ -5,4 +5,5 @@ function del_naire(naire_id) {
 
 $("#add").click(function () {
     console.log('添加新的调查问卷');
+
 });
