@@ -1,8 +1,9 @@
-5
+import json
+
 from django.shortcuts import render, reverse, redirect, HttpResponse
 from django.http import JsonResponse
 from  app01 import models
-from app01.my_forms import QuestionForm, OptionForm
+from app01.my_forms import QuestionForm, OptionForm, LoginForm
 
 
 def login(request):
@@ -10,10 +11,10 @@ def login(request):
     登录
     '''
     if request.method == 'GET':
-        login_form = my_forms.LoginForm()
+        login_form = LoginForm()
         return render(request, 'login.html', {"login_form": login_form})
     else:
-        login_form = my_forms.LoginForm(request.POST)
+        login_form = LoginForm(request.POST)
         if not login_form.is_valid():
             return render(request, 'login.html', {"login_form": login_form})
         else:
@@ -47,6 +48,7 @@ def edit(request, naire_id):
     '''
     if request.method == 'GET':
         def outer():
+            '''第一层生成器，返回每一个问题被QuestionForm处理后的对象'''
             question_list = models.Question.objects.filter(questionnaire=naire_id)
             if not question_list:
                 # 如果是新添加的问卷
@@ -55,9 +57,12 @@ def edit(request, naire_id):
             else:
                 for que_obj in question_list:
                     que_form = QuestionForm(instance=que_obj)
-                    temp_dict = {"que_form": que_form, "que_obj": que_obj, "options": None}
+                    temp_dict = {"que_form": que_form, "que_obj": que_obj, "class": 'hidden', "options": None}
                     if que_obj.type == 2:
+                        temp_dict['class'] = ''
+
                         def inner():
+                            '''第二层生成器，返回单选类问题的每一个选项被OptionForm处理后的对象'''
                             option_list = models.Option.objects.filter(question=que_obj)
                             for opt_obj in option_list:
                                 opt_form = OptionForm(instance=opt_obj)
@@ -70,6 +75,16 @@ def edit(request, naire_id):
         return render(request, 'edit.html', {"que_form_yield": outer()})
 
     else:
+        former_que_list = []
+        request_list = json.loads(request.body.decode())
+        # print(request_list)
+        # request_list = [{'qid': '3', 'title': '这是一个单选题', 'type': '2',
+        #                  'options': [{'oid': '1', 'content': '选项A', 'value': '1'},
+        #                              {'oid': '2', 'content': '选项B新', 'value': '200'}]},
+        #                 {'qid': '0', 'title': '新建议', 'type': '3', 'options': []},
+        #                 {'qid': '0', 'title': '新打分', 'type': '1', 'options': []}]
+        for que_dict in request_list:
+            print(que_dict)
         return HttpResponse('post提交')
 
 

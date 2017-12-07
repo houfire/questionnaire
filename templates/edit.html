@@ -15,7 +15,6 @@
     <div class="clearfix"></div>
 
     <form class="form-horizontal" method="post" novalidate>
-        {% csrf_token %}
         <ol>
             {% for dict_item in que_form_yield %}
                 <div class="questionItem" qid="{{ dict_item.que_obj.id }}">
@@ -26,8 +25,7 @@
                                 {{ dict_item.que_form.title }}
                             </div>
                             <!-- 删除问题 -->
-                            <span class="glyphicon glyphicon-remove"
-                                  onclick="del_question({{ dict_item.que_obj.id }})"></span>
+                            <div class="removeQue"><span class="glyphicon glyphicon-remove"></span></div>
                         </div>
 
                         <div class="form-group">
@@ -35,31 +33,30 @@
                             <div class="col-md-2">
                                 {{ dict_item.que_form.type }}
                             </div>
-                            {% if dict_item.que_obj.type == 2 %}
-                                <div class="col-md-1 " style="padding-top: 6px">
-                                    <a href="javascript:void(0)">
-                                        <span class="glyphicon glyphicon-plus" style="padding-right: 5px"></span>添加选项
-                                    </a>
-                                </div>
-                            {% endif %}
+                            <div class="col-md-1 {{ dict_item.class }}" style="padding-top: 6px">
+                                <a href="javascript:void(0)" class="addOpt">
+                                    <span class="glyphicon glyphicon-plus" style="padding-right: 5px"></span>添加选项
+                                </a>
+                            </div>
                         </div>
 
-                        {% if dict_item.que_obj.type == 2 %}
-                            <ul>
-                                {% for opt_dict in dict_item.options %}
-                                    <div class="form-group">
-                                        <label class="control-label col-md-1">● 内容：</label>
-                                        <div class="col-md-2">
-                                            {{ opt_dict.opt_form.content }}
-                                        </div>
-                                        <label class="control-label col-md-1">分值：</label>
-                                        <div class="col-md-2">
-                                            {{ opt_dict.opt_form.value }}
-                                        </div>
+                        {#{% if dict_item.que_obj.type == 2 %}#}
+                        <ul>
+                            {% for opt_dict in dict_item.options %}
+                                <div class="form-group" oid="{{ opt_dict.opt_obj.id }}">
+                                    <label class="control-label col-md-1">● 内容</label>
+                                    <div class="col-md-2">
+                                        {{ opt_dict.opt_form.content }}
                                     </div>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
+                                    <label class="control-label col-md-1">分值</label>
+                                    <div class="col-md-2">
+                                        {{ opt_dict.opt_form.value }}
+                                    </div>
+                                    <div class="removeOpt"><span class="glyphicon glyphicon-remove"></span></div>
+                                </div>
+                            {% endfor %}
+                        </ul>
+                        {#{% endif %}#}
 
                     </li>
                 </div>

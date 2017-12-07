@@ -3,8 +3,11 @@
 }
 
 .questionItem ul {
-    list-style: circle;
-    margin-left: 60px;
+    margin-left: 40px;
+}
+
+.removeQue, .removeOpt {
+    padding-top: 8px;
 }
 
 form.form-horizontal ol {
