@@ -9,67 +9,62 @@
 
 {% block content %}
     <div class="option pull-right">
-        <button class="btn btn-success">添加</button>
-        <button class="btn btn-primary">保存</button>
+        <button class="btn btn-success" id="addQue">添加</button>
+        <button class="btn btn-primary" id="save">保存</button>
     </div>
     <div class="clearfix"></div>
 
-    <form class="form-horizontal" method="post">
-
-        {% for question in question_list %}
-            <div class="questionItem">
-                <div>问题{{ forloop.counter }}</div>
-                <div class="form-group">
-                    <label for="question_{{ question.id }}" class="col-md-1 control-label">问题</label>
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" id="question_{{ question.id }}"
-                               value="{{ question.title }}">
-                    </div>
-                    <span class="glyphicon glyphicon-remove" onclick="del_question({{ question.id }})"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="type_{{ forloop.counter }}" class="col-md-1 control-label">类型</label>
-                    <div class="col-md-2">
-                        <select name="question_types" class="form-control">
-                            {% for type in  question.question_types %}
-                                {% if question.type == type.0 %}
-                                    <option value="{{ type.0 }}" selected>{{ type.1 }}</option>
-                                {% else %}
-                                    <option value="{{ type.0 }}">{{ type.1 }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                    </div>
-                    {% if question.type == 2 %}
-                        <div class="col-md-2">
-                            <a href="javascript:void(0)" onclick="add_question()">
-                                <span class="glyphicon glyphicon-plus"></span>
-                                <span>添加选项</span>
-                            </a>
+    <form class="form-horizontal" method="post" novalidate>
+        {% csrf_token %}
+        <ol>
+            {% for dict_item in que_form_yield %}
+                <div class="questionItem" qid="{{ dict_item.que_obj.id }}">
+                    <li>
+                        <div class="form-group">
+                            <label class="col-md-1 control-label">问题</label>
+                            <div class="col-md-6">
+                                {{ dict_item.que_form.title }}
+                            </div>
+                            <!-- 删除问题 -->
+                            <span class="glyphicon glyphicon-remove"
+                                  onclick="del_question({{ dict_item.que_obj.id }})"></span>
                         </div>
-                        <div class="clearfix"></div>
-                        <br>
-                        <ul>
-                            {% for option in question.option_set.all %}
-                                <li>
-                                    <span>
-                                        <label for="">内容：</label>
-                                        <input type="text" value="{{ option.content }}">
-                                    </span>
-                                    <span>
-                                        <label for="">分值：</label>
-                                        <input type="text" value="{{ option.value }}">
-                                    </span>
-                                </li>
-                            {% endfor %}
-                        </ul>
 
-                    {% endif %}
+                        <div class="form-group">
+                            <label class="col-md-1 control-label">类型</label>
+                            <div class="col-md-2">
+                                {{ dict_item.que_form.type }}
+                            </div>
+                            {% if dict_item.que_obj.type == 2 %}
+                                <div class="col-md-1 " style="padding-top: 6px">
+                                    <a href="javascript:void(0)">
+                                        <span class="glyphicon glyphicon-plus" style="padding-right: 5px"></span>添加选项
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if dict_item.que_obj.type == 2 %}
+                            <ul>
+                                {% for opt_dict in dict_item.options %}
+                                    <div class="form-group">
+                                        <label class="control-label col-md-1">● 内容：</label>
+                                        <div class="col-md-2">
+                                            {{ opt_dict.opt_form.content }}
+                                        </div>
+                                        <label class="control-label col-md-1">分值：</label>
+                                        <div class="col-md-2">
+                                            {{ opt_dict.opt_form.value }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                    </li>
                 </div>
-            </div>
-        {% endfor %}
-
+            {% endfor %}
+        </ol>
     </form>
 {% endblock content %}
 

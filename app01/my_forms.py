@@ -29,10 +29,19 @@ class LoginForm(ModelForm):
 class QuestionForm(ModelForm):
     class Meta:
         model = models.Question
-        fields = ['title', 'type']
+        fields = ['id', 'title', 'type']
+
+        widgets = {
+            "title": wd.TextInput(attrs={"class": 'form-control'}),
+            "type": wd.Select(attrs={"class": 'form-control'}),
+        }
 
 
 class OptionForm(ModelForm):
     class Meta:
         model = models.Option
         fields = ['content', 'value']
+        widgets = {
+            "content": wd.TextInput(attrs={"class": 'form-control'}),
+            "value": wd.TextInput(attrs={"class": 'form-control'}),
+        }

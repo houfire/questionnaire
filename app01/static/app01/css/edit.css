@@ -6,3 +6,21 @@
     list-style: circle;
     margin-left: 60px;
 }
+
+form.form-horizontal ol {
+    list-style: none;
+    padding: 0;
+    /*数字自增*/
+    counter-reset: sectioncounter
+}
+
+ol > .questionItem > li {
+    background-color: #f9f9f9;
+}
+
+ol > .questionItem > li:before {
+    content: '问题' counter(sectioncounter) ':';
+    counter-increment: sectioncounter;
+    font-size: 18px;
+    color: #d4d4d4;
+}
