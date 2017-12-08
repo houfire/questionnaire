@@ -1,6 +1,10 @@
+// 关于未保存时的刷新：应该像博客园那样，刷新的时候提示“是否要保存”，如果选择不保存，一切改动无效
+
 // 每次打开网页，生成一个空的、隐藏的questionItem，放在<ol>标签的开头，做克隆的模板
+var $form = $("form");
+
 $(function () {
-    $(".questionItem:first").clone().attr({"qid": 0, "id": 'modelItem'}).addClass('hidden').prependTo($("form ol"));
+    $(".questionItem:first").clone().attr({"qid": null, "id": 'modelItem'}).addClass('hidden').prependTo($("form ol"));
 
     // 清空input框
     $("input[name=title]:first").val('');
@@ -16,54 +20,25 @@ $(function () {
     }
 });
 
-// 用于克隆questionItem标签的函数
-function add_que() {
+
+// 添加问题
+$("#addQue").click(function () {
     $("#modelItem").clone().attr("id", null).removeClass('hidden').appendTo($("form ol"));
-}
-
-// 点击“添加”按钮，向问卷中添加问题#################
-$("#addQue").click(add_que);
-
-
-// 删除问卷里的问题##############################
-$("form").on('click', '.removeQue', function () {
-    var itemNum = $(".questionItem").length;// 删除前统计当前questionItem标签的数量
-    console.log(itemNum);
-    if (itemNum === 2) {
-        // 当itemNum=2的时候，说明已有的问题都已经或者即将被删除，此时应该克隆一个新的标签并显示，itemNum会一直等于2,
-        add_que();
-    }
-
-    var $questionItem = $(this).parent().parent().parent();
-    var qid = $questionItem.attr('qid');
-
-    if (qid === '0') {
-        // 如果是JS添加的问题框，qid为0，直接删除
-        $questionItem.remove();
-    }
-    else {
-        // 如果是数据库中存在的问题，提交ajax请求删除
-        $.ajax({
-            url: '/del_question/' + qid,
-            success: function (data) {
-                var res_dict = JSON.parse(data);
-                if (res_dict['status']) {
-                    $questionItem.remove();
-                }
-                else {
-                    alert('问题删除失败');
-                }
-            }
-        });
-    }
 });
 
 
-// 给select框委派事件############################
-$("form").on('change', 'select', function () {
+// 删除问题
+$form.on('click', '.removeQue', function () {
+    $(this).parent().parent().parent().remove();
+});
+
+
+// select框的change事件委派
+$form.on('change', 'select', function () {
     if ($(this).children(':selected').val() === '2') {
-        // 如果用户选择的是单选类型，显示“添加选项”按钮
+        // 如果用户选择的是单选类型，显示“添加选项”按钮，并添加一组选项
         $(this).parent().next().removeClass('hidden');
+
         var s = '<div class="form-group">\n' +
             '<label class="control-label col-md-1">● 内容</label>\n' +
             '<div class="col-md-2">\n' +
@@ -78,14 +53,15 @@ $("form").on('change', 'select', function () {
         $(this).parent().parent().next().append(s);
     }
     else {
+        // 如果用户选择的是其他类型，隐藏“添加选项”按钮，并清空选项
         $(this).parent().next().addClass('hidden');
         $(this).parent().parent().next().html('');
     }
 });
 
 
-// 点击“添加选项标签”，添加一个选项################
-$("form").on('click', '.addOpt', function () {
+// 添加选项
+$form.on('click', '.addOpt', function () {
     var s = '<div class="form-group">\n' +
         '<label class="control-label col-md-1">● 内容</label>\n' +
         '<div class="col-md-2">\n' +
@@ -100,24 +76,26 @@ $("form").on('click', '.addOpt', function () {
     $(this).parent().parent().next().append(s);
 });
 
-// 删除选项#####################################
-$("form").on('click', '.removeOpt', function () {
+
+// 删除选项
+$form.on('click', '.removeOpt', function () {
     $(this).parent().remove();
 });
 
-// ============================================================================================
+
+// 点击保存，提交ajax请求#############################
 $("#save").click(function () {
     var data_list = [];
     $(".questionItem:gt(0)").each(function () {
         var temp_dict = {
-            "qid": $(this).attr('qid'),
+            "qid": Number($(this).attr('qid')),
             "title": $(this).find('input[name=title]').val(),
-            "type": $(this).find('select[name=type]').val(),
+            "type": Number($(this).find('select[name=type]').val()),
             "options": []
         };
-        if (temp_dict['type'] === '2') {
+        if (temp_dict['type'] === 2) {
             $(this).find('ul>.form-group').each(function () {
-                var oid = $(this).attr('oid');
+                var oid = Number($(this).attr('oid'));
                 var content = $(this).find('input[name=content]').val();
                 var value = $(this).find('input[name=value]').val();
                 temp_dict['options'].push({"oid": oid, "content": content, "value": value})
@@ -131,8 +109,8 @@ $("#save").click(function () {
         headers: {"X-CSRFToken": $.cookie('csrftoken')},
         data: JSON.stringify(data_list),
         contentType: 'application/json',
-        success: function (data) {
-            console.log('OK');
+        success: function (res_dict) {
+            console.log(res_dict);
         }
     })
 });

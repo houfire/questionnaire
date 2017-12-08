@@ -23,9 +23,9 @@ urlpatterns = [
     url(r'^login/$', views.login, name='login'),
 
     url(r'^add/$', views.add, name='add'),
-    url(r'^edit/(\d+)$', views.edit, name='edit'),
-    url(r'^del_question/(\d+)$', views.del_question, name='del_que'),
+    url(r'^edit/(\d+)/$', views.edit, name='edit'),
+    url(r'^del_question/(\d+)/$', views.del_question, name='del_que'),
     url(r'^delete/$', views.delete, name='delete'),
     url(r'^check/$', views.check, name='check'),
-    url(r'^show/\d+/(\d+)$', views.show, name='show'),
+    url(r'^show/\d+/(\d+)/$', views.show, name='show'),
 ]
