@@ -36,7 +36,7 @@
                     <td>{{ naire.question_set.first.answer_set.count }}/{{ naire.classroom.student_set.count }}</td>
                     <td><a href="{% url 'edit' naire.id %}">编辑问卷</a></td>
                     <td>
-                        <a href="{% url 'show' naire.id %}">/show/{{ naire.classroom_id }}/{{ naire.id }}</a>
+                        <a href="{% url 'show' naire.classroom_id naire.id %}">/show/{{ naire.classroom_id }}/{{ naire.id }}</a>
                     </td>
                     <td><a href="###">查看评分</a></td>
                     <td><a href="javascript:void(0)" onclick="del_naire({{ naire.id }})">删除</a></td>

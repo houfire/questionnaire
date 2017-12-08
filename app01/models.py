@@ -110,6 +110,8 @@ class Option(models.Model):
 class Answer(models.Model):
     content = models.CharField(max_length=64, null=True, blank=True, verbose_name='文本内容')
     value = models.IntegerField(null=True, blank=True, verbose_name='后台取值')
+
+
     question = models.ForeignKey(to='Question', verbose_name='对应问题')
     student = models.ForeignKey(to='Student', verbose_name='对应答案')
 

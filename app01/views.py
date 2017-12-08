@@ -1,11 +1,12 @@
 import json
 
+from django.forms import Form, fields, widgets
 from django.shortcuts import render, reverse, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.transaction import atomic
 
 from  app01 import models
-from app01.my_forms import QuestionForm, OptionForm, LoginForm
+from app01.my_forms import LoginForm, QuestionForm, OptionForm
 
 
 def login(request):
@@ -26,8 +27,20 @@ def login(request):
             if not user:
                 return redirect(reverse('login'))
             else:
-                request.session['username'] = username
-                return redirect(reverse('check'))
+                roles = user.role.values_list('name')
+                for role_tup in roles:
+                    if '班主任' in role_tup:
+                        request.session['userinfo'] = {"username": username, "role": '班主任', "class_id": None}
+                        return redirect(reverse('check'))
+                    else:
+                        request.session['userinfo'] = {"username": username, "role": '学生',
+                                                       "class_id": user.student.classroom_id}
+                        return render(request, 'index.html')
+
+
+def logout(request):
+    request.session.flush()
+    return redirect(reverse('login'))
 
 
 def index(request):
@@ -174,21 +187,47 @@ def check(request):
     问卷列表
     '''
     naire_list = models.Questionnaire.objects.all()
-    username = request.session.get('username')
-    if not username:
+    session_dict = request.session.get('userinfo')
+    if not session_dict:
         return redirect(reverse('login'))
     else:
+        username = session_dict['username']
         return render(request, 'check.html', {"naire_list": naire_list, "username": username})
 
 
-def show(request, naire_id):
+def show(request, class_id, naire_id):
     '''
     投放问卷页面
     '''
-    questionnaire_obj = models.Questionnaire.objects.filter(id=naire_id).first()
-    if not questionnaire_obj:
-        return render(request, 'not found.html')
-    else:
-        question_list = questionnaire_obj.question_set.all()
 
-    return render(request, 'show.html', {"questionnaire_obj": questionnaire_obj, "question_list": question_list})
+    if not models.ClassRoom.objects.filter(id=class_id).exists():
+        # 如果url中的班级id不存在
+        return render(request, 'not found.html')
+    elif not models.Questionnaire.objects.filter(id=naire_id).exists():
+        # 如果url中的问卷id不存在
+        return render(request, 'not found.html')
+
+    session_dict = request.session.get('userinfo')
+    user_class_id = session_dict.get('class_id')
+
+    if user_class_id != int(class_id):
+        return render(request, 'not found.html', {"warning": "不是本班学生不能填写问卷！"})
+    else:
+        question_list = models.Question.objects.filter(questionnaire_id=naire_id)
+        form_dict = {}
+
+        for que_obj in question_list:
+            if que_obj.type == 1:
+                pass
+            elif que_obj.type == 2:
+                pass
+            else:
+                pass
+
+        ShowForm = type("ShowForm", (Form,), {
+            'a': fields.ChoiceField(choices=[(i, i) for i in range(1, 11)], widget=widgets.RadioSelect)
+        })
+
+        # 十五字验证，不能为空
+        show_form = ShowForm()
+        return render(request, 'show.html', {"show_form": show_form})
