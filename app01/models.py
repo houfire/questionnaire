@@ -1,12 +1,26 @@
 from django.db import models
 
 
+class Role(models.Model):
+    '''
+    角色表
+    '''
+    name = models.CharField(max_length=16, verbose_name='角色名')
+
+    class Meta:
+        verbose_name_plural = '角色表'
+
+    def __str__(self):
+        return self.name
+
+
 class UserInfo(models.Model):
     '''
     用户信息表
     '''
     username = models.CharField(max_length=16, verbose_name='用户名')
     password = models.CharField(max_length=16, verbose_name='密码')
+    role = models.ManyToManyField(to='Role', verbose_name='担任的角色', null=True)
 
     class Meta:
         verbose_name_plural = '用户信息表'
