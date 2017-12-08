@@ -20,7 +20,7 @@ class UserInfo(models.Model):
     '''
     username = models.CharField(max_length=16, verbose_name='用户名')
     password = models.CharField(max_length=16, verbose_name='密码')
-    role = models.ManyToManyField(to='Role', verbose_name='担任的角色', null=True)
+    role = models.ManyToManyField(to='Role', verbose_name='担任的角色')
 
     class Meta:
         verbose_name_plural = '用户信息表'
@@ -48,8 +48,8 @@ class Student(models.Model):
     学生表
     '''
     name = models.CharField(max_length=10, verbose_name='姓名')
-    # user = models.OneToOneField(to='UserInfo', verbose_name='关联用户')
     classroom = models.ForeignKey(to='ClassRoom', verbose_name='所属班级')
+    user = models.OneToOneField(to='UserInfo', verbose_name='关联的用户')
 
     class Meta:
         verbose_name_plural = '学生表'
