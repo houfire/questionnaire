@@ -77,32 +77,71 @@ def edit(request, naire_id):
         return render(request, 'edit.html', {"que_form_yield": outer()})
 
     else:
-        request_list = json.loads(request.body.decode())
-        print(request_list)
+        req_que_list = json.loads(request.body.decode())
+        # print(req_que_list)
 
         db_que_list = models.Question.objects.filter(questionnaire_id=naire_id)
-        db_que_id_list = [i.id for i in db_que_list]
-        post_que_id_list = [i['qid'] for i in request_list if i['qid']]
-        del_qid_set = set(db_que_id_list) - set(post_que_id_list)  # 待删除的问题id集合
+        db_qid_list = [i.id for i in db_que_list]
+        post_qid_list = [i['qid'] for i in req_que_list if i['qid']]
+        del_qid_set = set(db_qid_list) - set(post_qid_list)  # 待删除的问题id集合
+
         for qid in del_qid_set:
             # 删除问题
             models.Question.objects.filter(id=qid).delete()
 
-        for que_dict in request_list:
+        for que_dict in req_que_list:
             qid = que_dict['qid']
+            title = que_dict['title']
+            type = que_dict['type']
             if not qid:
                 # 新建问题
                 with atomic():
-                    new_que_obj = models.Question.objects.create(title=que_dict['title'], type=que_dict['type'],
-                                                                 questionnaire_id=naire_id)
+                    new_que_obj = models.Question.objects.create(title=title, type=type, questionnaire_id=naire_id)
                     if que_dict['type'] == 2:
                         for opt_dict in que_dict['options']:
                             models.Option.objects.create(content=opt_dict['content'], value=opt_dict['value'],
                                                          question=new_que_obj)
-            elif qid in db_que_id_list:
+            elif qid in db_qid_list:
                 # 更新问题，有可能存在有人在前端手动修改"qid"的情况，所以要做筛选，只更新数据库中已经存在的问题
-                models.Question.objects.filter(id=qid).update(title=que_dict['title'], type=que_dict['type'],
-                                                              questionnaire_id=naire_id)
+
+                update_query_set = models.Question.objects.filter(id=qid)
+                former_que_type = update_query_set.first().type
+                now_que_type = que_dict['type']
+                update_query_set.update(title=title, type=type)
+
+                # 对问题类型可能出现的变化做处理
+                if former_que_type == 2:
+                    # 对原单选类问题的修改
+                    if now_que_type == 2:
+                        req_opt_list = que_dict['options']  # 在前端限制不能提交空值，这里一定不为空
+
+                        db_opt_list = models.Option.objects.filter(question_id=qid)
+                        db_oid_list = [i.id for i in db_opt_list]
+                        post_oid_list = [i['oid'] for i in req_opt_list]
+                        del_oid_set = set(db_oid_list) - set(post_oid_list)
+                        for oid in del_oid_set:
+                            # 删除选项
+                            models.Option.objects.filter(id=oid).delete()
+
+                        for opt_dict in req_opt_list:
+                            oid = opt_dict['oid']
+                            content = opt_dict['content']
+                            value = opt_dict['value']
+                            if not oid:
+                                models.Option.objects.create(content=content, value=value, question_id=qid)
+                            elif oid in db_oid_list:
+                                models.Option.objects.filter(id=oid).update(content=content, value=value)
+                            else:
+                                # 前端"oid"被修改，不做任何操作
+                                pass
+                    else:
+                        # 单选-->其他类型，清空选项
+                        models.Option.objects.filter(question_id=qid).delete()
+                elif now_que_type == 2:
+                    # 其他类型-->单选，创建选项
+                    for opt_dict in que_dict['options']:
+                        models.Option.objects.create(content=opt_dict['content'], value=opt_dict['value'],
+                                                     question_id=qid)
             else:
                 # 前端"qid"被修改，不做任何操作
                 pass

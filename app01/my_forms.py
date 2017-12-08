@@ -5,6 +5,8 @@ from app01 import models
 
 
 class LoginForm(ModelForm):
+    '''登录页面'''
+
     class Meta:
         model = models.UserInfo
         fields = '__all__'
@@ -27,6 +29,8 @@ class LoginForm(ModelForm):
 
 
 class QuestionForm(ModelForm):
+    '''问题编辑页面展示问题'''
+
     class Meta:
         model = models.Question
         fields = ['id', 'title', 'type']
@@ -38,6 +42,8 @@ class QuestionForm(ModelForm):
 
 
 class OptionForm(ModelForm):
+    '''问题编辑页面展示选项'''
+
     class Meta:
         model = models.Option
         fields = ['content', 'value']
