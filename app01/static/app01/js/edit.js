@@ -95,10 +95,11 @@ $("#save").click(function () {
         };
         if (temp_dict['type'] === 2) {
             $(this).find('ul>.form-group').each(function () {
-                var oid = Number($(this).attr('oid'));
-                var content = $(this).find('input[name=content]').val();
-                var value = $(this).find('input[name=value]').val();
-                temp_dict['options'].push({"oid": oid, "content": content, "value": value})
+                temp_dict['options'].push({
+                    "oid": Number($(this).attr('oid')),
+                    "content": $(this).find('input[name=content]').val(),
+                    "value": $(this).find('input[name=value]').val()
+                })
             })
         }
         data_list.push(temp_dict);

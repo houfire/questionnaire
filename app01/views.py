@@ -77,34 +77,35 @@ def edit(request, naire_id):
         return render(request, 'edit.html', {"que_form_yield": outer()})
 
     else:
-        db_que_list = models.Question.objects.filter(questionnaire_id=naire_id)
         request_list = json.loads(request.body.decode())
-        # print(request_list)
+        print(request_list)
 
-        request_list0 = [{'qid': 8, 'title': '修改的建议', 'type': 3, 'options': []},
-                         {'qid': 23, 'title': 'bb', 'type': 2, 'options': [{'oid': 15, 'content': 'a', 'value': 'b'},
-                                                                           {'oid': None, 'content': '新增的选项',
-                                                                            'value': '新增的分值'}]},
-                         {'qid': None, 'title': '新增的打分', 'type': 1, 'options': []}]
-
+        db_que_list = models.Question.objects.filter(questionnaire_id=naire_id)
         db_que_id_list = [i.id for i in db_que_list]
         post_que_id_list = [i['qid'] for i in request_list if i['qid']]
-        print(db_que_id_list, post_que_id_list)
-        del_id_list = set(db_que_id_list) - set(post_que_id_list)  # 待删除的问题id
-        print(del_id_list)
+        del_qid_set = set(db_que_id_list) - set(post_que_id_list)  # 待删除的问题id集合
+        for qid in del_qid_set:
+            # 删除问题
+            models.Question.objects.filter(id=qid).delete()
 
         for que_dict in request_list:
-            if not que_dict['qid']:
+            qid = que_dict['qid']
+            if not qid:
+                # 新建问题
                 with atomic():
                     new_que_obj = models.Question.objects.create(title=que_dict['title'], type=que_dict['type'],
                                                                  questionnaire_id=naire_id)
                     if que_dict['type'] == 2:
                         for opt_dict in que_dict['options']:
-                            new_opt_obj = models.Option.objects.create(content=opt_dict['content'],
-                                                                       value=opt_dict['value'],
-                                                                       question=new_que_obj)
+                            models.Option.objects.create(content=opt_dict['content'], value=opt_dict['value'],
+                                                         question=new_que_obj)
+            elif qid in db_que_id_list:
+                # 更新问题，有可能存在有人在前端手动修改"qid"的情况，所以要做筛选，只更新数据库中已经存在的问题
+                models.Question.objects.filter(id=qid).update(title=que_dict['title'], type=que_dict['type'],
+                                                              questionnaire_id=naire_id)
             else:
-                print('删除或者更新')
+                # 前端"qid"被修改，不做任何操作
+                pass
         return HttpResponse('post提交')
 
 
