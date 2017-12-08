@@ -2,6 +2,8 @@ import json
 
 from django.shortcuts import render, reverse, redirect, HttpResponse
 from django.http import JsonResponse
+from django.db.transaction import atomic
+
 from  app01 import models
 from app01.my_forms import QuestionForm, OptionForm, LoginForm
 
@@ -81,10 +83,20 @@ def edit(request, naire_id):
         # request_list = [{'qid': '3', 'title': '这是一个单选题', 'type': '2',
         #                  'options': [{'oid': '1', 'content': '选项A', 'value': '1'},
         #                              {'oid': '2', 'content': '选项B新', 'value': '200'}]},
+        #                 {'qid': '0', 'title': '打分题', 'type': '1', 'options': []},
         #                 {'qid': '0', 'title': '新建议', 'type': '3', 'options': []},
-        #                 {'qid': '0', 'title': '新打分', 'type': '1', 'options': []}]
+        #                 {'qid': '0', 'title': '单选题', 'type': '2',
+        #                  'options': [{'content': 'CCCC', 'value': '123'}, {'content': 'DDDDD', 'value': '456'}]}]
+
         for que_dict in request_list:
-            print(que_dict)
+            if que_dict['qid'] == '0':
+                with atomic():
+                    new_que_obj = models.Question.objects.create(title=que_dict['title'], type=que_dict['type'],
+                                                                 question_naire_id=naire_id)
+                    if que_dict['type'] == '2':
+                        for opt_dict in que_dict['options']:
+                            models.Option.objects.create(content=opt_dict['content'], value=opt_dict['value'],
+                                                         question=new_que_obj)
         return HttpResponse('post提交')
 
 

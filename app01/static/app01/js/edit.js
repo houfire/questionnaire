@@ -67,11 +67,11 @@ $("form").on('change', 'select', function () {
         var s = '<div class="form-group">\n' +
             '<label class="control-label col-md-1">● 内容</label>\n' +
             '<div class="col-md-2">\n' +
-            '    <input type="text" class="form-control">\n' +
+            '    <input type="text" name="content" class="form-control" maxlength="16">\n' +
             '</div>\n' +
             '<label class="control-label col-md-1">分值</label>\n' +
             '<div class="col-md-2">\n' +
-            '    <input type="text" class="form-control">\n' +
+            '    <input type="text" name="value" class="form-control" maxlength="16">\n' +
             '</div>\n' +
             '<div class="removeOpt"><span class="glyphicon glyphicon-remove"></span></div>\n' +
             '</div>';
@@ -125,7 +125,7 @@ $("#save").click(function () {
         }
         data_list.push(temp_dict);
     });
-    console.log(data_list);
+    // console.log(data_list);
     $.post({
         url: location.pathname,
         headers: {"X-CSRFToken": $.cookie('csrftoken')},
