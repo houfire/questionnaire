@@ -1,6 +1,6 @@
 import json
 
-from django.forms import Form, fields, widgets
+from django.forms import Form, fields, widgets, ValidationError
 from django.shortcuts import render, reverse, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.transaction import atomic
@@ -33,7 +33,7 @@ def login(request):
                         request.session['userinfo'] = {"username": username, "role": '班主任', "class_id": None}
                         return redirect(reverse('check'))
                     else:
-                        request.session['userinfo'] = {"username": username, "role": '学生',
+                        request.session['userinfo'] = {"username": username, "role": '学生', "stu_id": user.student.id,
                                                        "class_id": user.student.classroom_id}
                         return render(request, 'index.html')
 
@@ -200,6 +200,7 @@ def show(request, class_id, naire_id):
     投放问卷页面
     '''
 
+    # 对当前URL进行校验############################
     if not models.ClassRoom.objects.filter(id=class_id).exists():
         # 如果url中的班级id不存在
         return render(request, 'not found.html')
@@ -207,27 +208,62 @@ def show(request, class_id, naire_id):
         # 如果url中的问卷id不存在
         return render(request, 'not found.html')
 
+    # 对当前打开问卷页面的用户进行校验##############
     session_dict = request.session.get('userinfo')
     user_class_id = session_dict.get('class_id')
-
     if user_class_id != int(class_id):
         return render(request, 'not found.html', {"warning": "不是本班学生不能填写问卷！"})
-    else:
-        question_list = models.Question.objects.filter(questionnaire_id=naire_id)
-        form_dict = {}
 
-        for que_obj in question_list:
-            if que_obj.type == 1:
-                pass
-            elif que_obj.type == 2:
-                pass
-            else:
-                pass
+    stu_id = session_dict.get('stu_id')
+    if models.Answer.objects.filter(student_id=stu_id).exists():
+        return render(request, 'not found.html', {"warning": '已经填写过此问卷！'})
 
-        ShowForm = type("ShowForm", (Form,), {
-            'a': fields.ChoiceField(choices=[(i, i) for i in range(1, 11)], widget=widgets.RadioSelect)
-        })
+    # 动态生成Form组件#############################
+    def my_valid(text):
+        '''自定义验证规则'''
+        if len(text) < 15:
+            raise ValidationError('内容不能少于十五字')
 
-        # 十五字验证，不能为空
+    question_list = models.Question.objects.filter(questionnaire_id=naire_id)
+    form_dict = {}
+
+    for que_obj in question_list:
+        if que_obj.type == 1:
+            form_dict['value_%s' % que_obj.id] = fields.ChoiceField(
+                label=que_obj.title,
+                widget=widgets.RadioSelect,
+                choices=[(i, i) for i in range(1, 11)],
+                error_messages={"required": '不能为空'}, )
+        elif que_obj.type == 2:
+            form_dict['option_id_%s' % que_obj.id] = fields.ChoiceField(
+                label=que_obj.title,
+                widget=widgets.RadioSelect,
+                choices=models.Option.objects.filter(question=que_obj).values_list('value', 'content'),
+                error_messages={"required": '不能为空'}, )
+        else:
+            form_dict['content_%s' % que_obj.id] = fields.CharField(
+                label=que_obj.title,
+                widget=widgets.Textarea,
+                error_messages={"required": '不能为空'},
+                validators=(my_valid,), )
+
+    ShowForm = type("ShowForm", (Form,), form_dict)  # 动态创建一个Form类
+
+    # 处理HTTP请求################################
+    if request.method == 'GET':
         show_form = ShowForm()
         return render(request, 'show.html', {"show_form": show_form})
+    else:
+        show_form = ShowForm(request.POST)
+        if not show_form.is_valid():
+            return render(request, 'show.html', {"show_form": show_form})
+        else:
+            print(show_form.cleaned_data)
+            bulk_obj_list = []
+            for k, v in show_form.cleaned_data.items():
+                col, qid = k.rsplit('_', 1)
+                answer_dict = {"qid": qid, "student_id": stu_id, col: v}
+                bulk_obj_list.append(models.Answer(**answer_dict))
+            # models.Answer.objects.bulk_create(bulk_obj_list)
+            print('答案添加成功')
+        return HttpResponse('post提交')

@@ -108,12 +108,12 @@ class Option(models.Model):
 
 
 class Answer(models.Model):
+    value = models.IntegerField(null=True, blank=True, verbose_name='后台分值')
+    option = models.OneToOneField(to='Option', verbose_name='对应选项', null=True)
     content = models.CharField(max_length=64, null=True, blank=True, verbose_name='文本内容')
-    value = models.IntegerField(null=True, blank=True, verbose_name='后台取值')
 
-
-    question = models.ForeignKey(to='Question', verbose_name='对应问题')
-    student = models.ForeignKey(to='Student', verbose_name='对应答案')
+    question = models.ForeignKey(to='Question', verbose_name='所属问题')
+    student = models.ForeignKey(to='Student', verbose_name='对应学生')
 
     class Meta:
         verbose_name_plural = '问题答案表'
