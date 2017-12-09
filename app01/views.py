@@ -258,12 +258,11 @@ def show(request, class_id, naire_id):
         if not show_form.is_valid():
             return render(request, 'show.html', {"show_form": show_form})
         else:
-            print(show_form.cleaned_data)
+            # print(show_form.cleaned_data)
             bulk_obj_list = []
             for k, v in show_form.cleaned_data.items():
                 col, qid = k.rsplit('_', 1)
-                answer_dict = {"qid": qid, "student_id": stu_id, col: v}
+                answer_dict = {"question_id": qid, "student_id": stu_id, col: v}
                 bulk_obj_list.append(models.Answer(**answer_dict))
-            # models.Answer.objects.bulk_create(bulk_obj_list)
-            print('答案添加成功')
-        return HttpResponse('post提交')
+            models.Answer.objects.bulk_create(bulk_obj_list)
+        return HttpResponse('感谢参与本次问卷调查！')

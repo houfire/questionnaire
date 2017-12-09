@@ -1,4 +1,4 @@
-{% load my_tags %}
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,61 +6,50 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static '/bootstrap/css/bootstrap.min.css' %}">
     <title>调查问卷</title>
     <style>
+        ol {
+            padding: 0;
+            list-style: none;
+            counter-reset: sectioncounter
+        }
+
+        ol > li:before {
+            content: counter(sectioncounter) '.';
+            counter-increment: sectioncounter;
+            font-size: 18px;
+        }
+
         ul {
             list-style: none;
         }
 
-        li {
+        ul > li {
             display: inline-block;
         }
     </style>
 </head>
 <body>
-<h3>{{ questionnaire_obj.title }}</h3>
-{#<div class="tips">#}
-{#    <p>1.本班学生才能评价</p>#}
-{#    <p>2.学生只能对同一个问卷进行一次调查</p>#}
-{#    <form method="post">#}
-{#        {% for question in question_list %}#}
-{#            <div>#}
-{#                <b>{{ forloop.counter }}.{{ question.title }}</b>#}
-{#                <div>#}
-{#                    {% if question.type == 1 %}#}
-{#                        {% for i in 10|my_range %}#}
-{#                            &nbsp;&nbsp;&nbsp;#}
-{#                            <span>#}
-{#                                <label for="score_{{ i }}">{{ i }}</label>#}
-{#                                <input type="radio" name="score" value="{{ i }}" id="score_{{ i }}">#}
-{#                            </span>#}
-{#                        {% endfor %}#}
-{#                    {% elif question.type == 2 %}#}
-{#                        {% for option in question.option_set.all %}#}
-{#                            <span>#}
-{#                                <label for="value_{{ option.value }}">{{ option.content }}</label>#}
-{#                                <input type="radio" name="option" value="{{ option.value }}"#}
-{#                                       id="value_{{ option.value }}">#}
-{#                            </span>#}
-{#                        {% endfor %}#}
-{#                    {% else %}#}
-{#                        <span>#}
-{#                            <textarea name="" id="" cols="70" rows="8"></textarea>#}
-{#                        </span>#}
-{#                    {% endif %}#}
-{#                    <p></p>#}
-{#                </div>#}
-{#            </div>#}
-{#        {% endfor %}#}
-{#    </form>#}
-{#</div>#}
 
-<form method="post" novalidate>
-    {% csrf_token %}
 
-    {{ show_form }}
-    <button class="btn btn-primary">提交</button>
+<div class="container">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <ol>
+            {% for que in show_form %}
+                <li>
+                    <span>{{ que.label }}<span>{{ que.errors }}</span></span>
+                    <p>{{ que }}</p>
+                </li>
+            {% endfor %}
+        </ol>
+        <button class="btn btn-primary">提交</button>
 
-</form>
+    </form>
+</div>
+
+
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </body>
 </html>
