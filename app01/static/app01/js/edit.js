@@ -105,6 +105,7 @@ $("#save").click(function () {
         data_list.push(temp_dict);
     });
     // console.log(data_list);
+
     $.post({
         url: location.pathname,
         headers: {"X-CSRFToken": $.cookie('csrftoken')},
