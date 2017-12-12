@@ -8,18 +8,20 @@
 {% block title %}调查问卷列表{% endblock %}
 
 {% block content %}
-    <div>
-        <a href="{% url 'add' %}" class="btn btn-success">添加</a>
+
+    <div class="pull-right">
+        <a class="btn btn-success" data-toggle="modal" data-target="#add_naire">添加</a>
     </div>
-    <br>
+    <div class="clearfix"></div>
+    <p></p>
     <div class="panel panel-success">
         <div class="panel-heading">问卷列表</div>
         <table class="table table-bordered table-hover table-striped">
             <thead>
             <tr>
                 <th><input type="checkbox"></th>
-                <th>调查问卷名称</th>
-                <th>问卷调查班级</th>
+                <th>调查问卷标题</th>
+                <th>调查班级</th>
                 <th>参与人数</th>
                 <th>问卷选项</th>
                 <th>问卷URL</th>
@@ -29,25 +31,68 @@
             </thead>
             <tbody>
             {% for naire in naire_list %}
-                <tr>
+                <tr id="naire_{{ naire.id }}">
                     <td><input type="checkbox"></td>
                     <td><a href="###">{{ naire.title }}</a></td>
                     <td>{{ naire.classroom.caption }}</td>
                     <td>{{ naire.question_set.first.answer_set.count }}/{{ naire.classroom.student_set.count }}</td>
                     <td><a href="{% url 'edit' naire.id %}">编辑问卷</a></td>
-                    <td>
-                        <a href="{% url 'show' naire.classroom_id naire.id %}">/show/{{ naire.classroom_id }}/{{ naire.id }}</a>
-                    </td>
+                    <td>/show/{{ naire.classroom_id }}/{{ naire.id }}</td>
                     <td><a href="###">查看评分</a></td>
-                    <td><a href="javascript:void(0)" onclick="del_naire({{ naire.id }})">删除</a></td>
+                    <td><a href="javascript:void (0)" class="delete">删除</a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 
-
 {% endblock content %}
+
+{% block modal %}
+
+    <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"
+         id="add_naire">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">添加问卷</h4>
+                </div>
+                <!-- 主体 -->
+                <div class="modal-body">
+
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="id_title" class="col-md-2 col-md-offset-2 control-label">问卷名称</label>
+                            <div class="col-md-5">
+                                {{ questionnaire_form.title }}
+                            </div>
+                            <span class="help-block" id="help-title"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2 col-md-offset-2 control-label">调查班级</label>
+                            <div class="col-md-3">
+                                {{ questionnaire_form.classroom }}
+                            </div>
+                            <span class="help-block" id="help-classroom"></span>
+                        </div>
+                    </form>
+
+                </div>
+                <!-- 保存、关闭按钮 -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary"  id="save">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+{% endblock modal %}
+
+
+
 
 {% block my_js %}
     <script src="{% static 'app01/js/check.js' %}"></script>

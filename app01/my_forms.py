@@ -28,6 +28,22 @@ class LoginForm(ModelForm):
             raise ValidationError('用户不存在')
 
 
+class QuestionnaireForm(ModelForm):
+    '''在模态框里做Form检验'''
+
+    class Meta:
+        model = models.Questionnaire
+        fields = '__all__'
+        error_messages = {
+            "title": {"required": '标题不能为空'},
+            "classroom": {"required": '调查班级不能为空'},
+        }
+        widgets = {
+            "title": wd.TextInput(attrs={"class": 'form-control', "aria-describedby": 'help-title'}),
+            "classroom": wd.Select(attrs={"class": 'form-control', "aria-describedby": 'help-classroom'}),
+        }
+
+
 class QuestionForm(ModelForm):
     '''问题编辑页面展示问题'''
 

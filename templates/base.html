@@ -11,18 +11,39 @@
     <title>{% block title %}模板{% endblock title %}</title>
 </head>
 <body>
-<h1>{{ username }}</h1>
-<p><a href="{% url 'logout' %}">注销</a></p>
 
-<div class="container-fluid">
+<nav class="navbar navbar-default">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <a class="navbar-brand" href="javascript:void(0)">调查问卷系统</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="javascript:void(0)">{{ username }}</a></li>
+                <li><a href="{% url 'logout' %}">注销</a></li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container">
     {% block content %}
         模板主体
     {% endblock content %}
 </div>
 
 
-<script src="{% static 'bootstrap/js/jquery-3.2.1.min.js' %}"></script>
-<script src="{% static 'bootstrap/js/jquery.cookie.js' %}"></script>
+{% block modal %}
+    模态框
+{% endblock modal %}
+
+
+<script src="{% static 'jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'jquery.cookie.js' %}"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 {% block my_js %}{% endblock my_js %}
 </body>
 </html>

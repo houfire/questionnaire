@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.db.transaction import atomic
 
 from  app01 import models
-from app01.my_forms import LoginForm, QuestionForm, OptionForm
+from app01.my_forms import LoginForm, QuestionnaireForm, QuestionForm, OptionForm
 
 
 def login(request):
@@ -61,15 +61,20 @@ def index(request):
     问卷列表
     '''
     session_dict = request.session.get('userinfo')
-    if not session_dict:
+
+    if not session_dict:  # 如果没有用户登录，跳转到登录页面
         return redirect(reverse('login'))
-    else:
-        if session_dict.get('role') == '学生':
-            return redirect(reverse('home'))
-        else:
-            naire_list = models.Questionnaire.objects.all()
-            username = session_dict['username']
-            return render(request, 'index.html', {"naire_list": naire_list, "username": username})
+
+    if session_dict.get('role') == '学生':  # 如果登录的用户是“学生”，跳转至'home'页面
+        return redirect(reverse('home'))
+
+    # 在页面展示问卷列表
+    username = session_dict.get('username')
+    naire_list = models.Questionnaire.objects.all()
+    questionnaire_form = QuestionnaireForm()
+
+    return render(request, 'index.html',
+                  {"naire_list": naire_list, "username": username, "questionnaire_form": questionnaire_form})
 
 
 def home(request):
@@ -83,7 +88,20 @@ def add(request):
     '''
     添加问卷
     '''
-    return HttpResponse('添加问卷')
+    if request.is_ajax():
+        req_dict = json.loads(request.body.decode('utf8'))
+
+        res_dict = {'status': True, 'error_msg': None}
+
+        title = req_dict.get('title')
+        classroom_id = req_dict.get('classroom_id')
+        try:
+            models.Questionnaire.objects.create(title=title, classroom_id=classroom_id)S
+        except Exception as e:
+            res_dict['status'] = False
+            res_dict['error_msg'] = str(e)
+
+    return JsonResponse(res_dict)
 
 
 def edit(request, naire_id):
@@ -207,8 +225,17 @@ def delete(request):
     '''
     删除问卷
     '''
-    res_dict = {'status': None, 'error_msg': None}
-    return JsonResponse(res_dict)
+    if request.is_ajax():
+        naire_id = request.GET.get('naire_id')
+        res_dict = {'status': True, 'error_msg': None}
+        try:
+            # models.Questionnaire.objects.filter(id=naire_id)
+            print('模拟删除成功')
+        except Exception as e:
+            res_dict['status'] = False
+            res_dict['error_msg'] = str(e)
+
+        return JsonResponse(res_dict)
 
 
 def show(request, class_id, naire_id):

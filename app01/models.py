@@ -67,6 +67,7 @@ class Questionnaire(models.Model):
 
     class Meta:
         verbose_name_plural = '问卷表'
+        unique_together = ('title', 'classroom')
 
     def __str__(self):
         return self.title
