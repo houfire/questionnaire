@@ -35,7 +35,7 @@ class RbacMiddleware(MiddlewareMixin):
         per_index = request.session.get('per_index')
 
         if not per_index:  # 没有用户登录
-            return redirect(reverse('login'))
+            return redirect(reverse('login.css'))
 
         per_info_dict = request.session.get('per_info_dict')
 

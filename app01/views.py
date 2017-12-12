@@ -14,12 +14,15 @@ def login(request):
     登录
     '''
     if request.method == 'GET':
+        print(request.GET.get('ReturnURL'))
         login_form = LoginForm()
         return render(request, 'login.html', {"login_form": login_form})
     else:
+        rtn_url = request.GET.get('ReturnURL')
+
         login_form = LoginForm(request.POST)
         if not login_form.is_valid():
-            return render(request, 'login.html', {"login_form": login_form})
+            return render(request, 'login_xxx.html', {"login_form": login_form})
         else:
             username = login_form.cleaned_data.get('username')
             password = login_form.cleaned_data.get('password')
@@ -31,23 +34,49 @@ def login(request):
                 for role_tup in roles:
                     if '班主任' in role_tup:
                         request.session['userinfo'] = {"username": username, "role": '班主任', "class_id": None}
-                        return redirect(reverse('check'))
+                        return redirect(reverse('index'))
                     else:
                         request.session['userinfo'] = {"username": username, "role": '学生', "stu_id": user.student.id,
                                                        "class_id": user.student.classroom_id}
-                        return render(request, 'index.html')
+                        if rtn_url:
+                            return redirect(rtn_url)
+                        else:
+                            return redirect(reverse('home'))
 
 
 def logout(request):
+    '''
+    注销
+    '''
+    rtn_url = request.GET.get('ReturnURL')
     request.session.flush()
-    return redirect(reverse('login'))
+    if rtn_url:
+        return redirect('/login/?ReturnURL=' + rtn_url)
+    else:
+        return redirect(reverse('login'))
 
 
 def index(request):
     '''
+    问卷列表
+    '''
+    session_dict = request.session.get('userinfo')
+    if not session_dict:
+        return redirect(reverse('login'))
+    else:
+        if session_dict.get('role') == '学生':
+            return redirect(reverse('home'))
+        else:
+            naire_list = models.Questionnaire.objects.all()
+            username = session_dict['username']
+            return render(request, 'index.html', {"naire_list": naire_list, "username": username})
+
+
+def home(request):
+    '''
     主页
     '''
-    return render(request, 'index.html')
+    return render(request, 'home.html')
 
 
 def add(request):
@@ -170,7 +199,7 @@ def del_question(request, qid):
         models.Question.objects.filter(id=qid).delete()
         res_dict['status'] = True
     except Exception as e:
-        res_dict['error_msg'] = e
+        res_dict['error_msg'] = str(e)
     return JsonResponse(res_dict)
 
 
@@ -182,23 +211,12 @@ def delete(request):
     return JsonResponse(res_dict)
 
 
-def check(request):
-    '''
-    问卷列表
-    '''
-    naire_list = models.Questionnaire.objects.all()
-    session_dict = request.session.get('userinfo')
-    if not session_dict:
-        return redirect(reverse('login'))
-    else:
-        username = session_dict['username']
-        return render(request, 'check.html', {"naire_list": naire_list, "username": username})
-
-
 def show(request, class_id, naire_id):
     '''
     投放问卷页面
     '''
+    if not request.session.get('userinfo').get('role') == '学生':
+        return redirect('/logout/?ReturnURL=' + request.path_info)
 
     # 对当前URL进行校验############################
     if not models.ClassRoom.objects.filter(id=class_id).exists():
