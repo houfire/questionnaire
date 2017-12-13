@@ -112,7 +112,12 @@ $("#save").click(function () {
         data: JSON.stringify(data_list),
         contentType: 'application/json',
         success: function (res_dict) {
-            console.log(res_dict);
+            if (res_dict['status']) {
+                location.href = '/';
+            }
+            else {
+                alert(res_dict['error_msg']);
+            }
         }
     })
 });

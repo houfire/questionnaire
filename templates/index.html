@@ -2,7 +2,8 @@
 
 {% block my_css %}
     {% load staticfiles %}
-    <link rel="stylesheet" href="{% static 'app01/css/check.css' %}">
+    {% load my_tags %}
+    <link rel="stylesheet" href="{% static 'app01/css/index.css' %}">
 {% endblock my_css %}
 
 {% block title %}调查问卷列表{% endblock %}
@@ -10,7 +11,7 @@
 {% block content %}
 
     <div class="pull-right">
-        <a class="btn btn-success" data-toggle="modal" data-target="#add_naire">添加</a>
+        <a class="btn btn-success" id="add" data-toggle="modal" data-target="#add_naire">添加</a>
     </div>
     <div class="clearfix"></div>
     <p></p>
@@ -19,7 +20,6 @@
         <table class="table table-bordered table-hover table-striped">
             <thead>
             <tr>
-                <th><input type="checkbox"></th>
                 <th>调查问卷标题</th>
                 <th>调查班级</th>
                 <th>参与人数</th>
@@ -32,10 +32,9 @@
             <tbody>
             {% for naire in naire_list %}
                 <tr id="naire_{{ naire.id }}">
-                    <td><input type="checkbox"></td>
                     <td><a href="###">{{ naire.title }}</a></td>
                     <td>{{ naire.classroom.caption }}</td>
-                    <td>{{ naire.question_set.first.answer_set.count }}/{{ naire.classroom.student_set.count }}</td>
+                    <td>{{ naire.question_set.first.answer_set.count|judge_zero }}/{{ naire.classroom.student_set.count }}</td>
                     <td><a href="{% url 'edit' naire.id %}">编辑问卷</a></td>
                     <td>/show/{{ naire.classroom_id }}/{{ naire.id }}</td>
                     <td><a href="###">查看评分</a></td>
@@ -83,7 +82,7 @@
                 <!-- 保存、关闭按钮 -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary"  id="save">保存</button>
+                    <button type="button" class="btn btn-primary" id="save">保存</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -95,5 +94,5 @@
 
 
 {% block my_js %}
-    <script src="{% static 'app01/js/check.js' %}"></script>
+    <script src="{% static 'app01/js/index.js' %}"></script>
 {% endblock my_js %}
