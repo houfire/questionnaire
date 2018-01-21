@@ -6,6 +6,10 @@
 
 ​	员工登录后可以添加、编辑、删除问卷，预览功能暂未实现。
 
+​	示例如图：
+
+​	![示例](https://raw.githubusercontent.com/MaksimSun/questionnaire/master/screenshots/%E7%A4%BA%E4%BE%8B.png)
+
 ## 二、技术点
 
 ### 1、使用自定义的`ModelForm`类动态生成标签
