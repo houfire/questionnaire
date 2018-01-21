@@ -61,21 +61,23 @@ $("#save").click(function () {
 
 // 给删除标签绑定事件
 $("tbody").on('click', '.delete', function () {
-    var $remove_el = $(this).parent().parent();
+    if (confirm('确认删除？')) {
+        var $remove_el = $(this).parent().parent();
+        $.get({
+            url: '/delete/',
+            data: {
+                'naire_id': $remove_el.attr('id').split('_')[1]
+            },
+            success: function (res_dict) {
+                if (res_dict['status']) {
+                    $remove_el.remove();
+                }
+                else {
+                    alert(res_dict['error_msg']);
+                }
+            }
+        })
+    }
 
-    $.get({
-        url: '/delete/',
-        data: {
-            'naire_id': $remove_el.attr('id').split('_')[1]
-        },
-        success: function (res_dict) {
-            if (res_dict['status']) {
-                $remove_el.remove();
-            }
-            else {
-                alert(res_dict['error_msg']);
-            }
-        }
-    })
 });
 

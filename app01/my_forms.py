@@ -15,8 +15,8 @@ class LoginForm(ModelForm):
             "password": {'required': '密码不能为空'},
         }
         widgets = {
-            "username": wd.TextInput(attrs={"placeholder": 'Username'}),
-            "password": wd.PasswordInput(attrs={"placeholder": 'Password'}),
+            "username": wd.TextInput(attrs={"placeholder": 'Username', "class": 'form-control'}),
+            "password": wd.PasswordInput(attrs={"placeholder": 'Password', "class": 'form-control'}),
         }
 
     def clean_username(self):

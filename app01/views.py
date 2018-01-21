@@ -5,7 +5,7 @@ from django.shortcuts import render, reverse, redirect, HttpResponse
 from django.http import JsonResponse
 from django.db.transaction import atomic
 
-from  app01 import models
+from app01 import models
 from app01.my_forms import LoginForm, QuestionnaireForm, QuestionForm, OptionForm
 
 
@@ -14,7 +14,6 @@ def login(request):
     登录
     '''
     if request.method == 'GET':
-        # print(request.GET.get('ReturnURL'))
         login_form = LoginForm()
         return render(request, 'login.html', {"login_form": login_form})
     else:
@@ -22,7 +21,7 @@ def login(request):
 
         login_form = LoginForm(request.POST)
         if not login_form.is_valid():
-            return render(request, 'login_xxx.html', {"login_form": login_form})
+            return render(request, 'login.html', {"login_form": login_form})
         else:
             username = login_form.cleaned_data.get('username')
             password = login_form.cleaned_data.get('password')
@@ -71,6 +70,8 @@ def index(request):
     # 在页面展示问卷列表
     username = session_dict.get('username')
     naire_list = models.Questionnaire.objects.all()
+
+    # 在添加问卷时使用ModalForm组件
     questionnaire_form = QuestionnaireForm()
 
     return render(request, 'index.html',
@@ -123,8 +124,10 @@ def edit(request, naire_id):
             else:
                 for que_obj in question_list:
                     que_form = QuestionForm(instance=que_obj)
+
                     temp_dict = {"que_form": que_form, "que_obj": que_obj, "class": 'hidden', "options": None}
                     if que_obj.type == 2:
+                        # 处理单选类问题
                         temp_dict['class'] = ''
 
                         def inner(question_obj):
@@ -134,7 +137,8 @@ def edit(request, naire_id):
                                 opt_form = OptionForm(instance=opt_obj)
                                 yield {"opt_form": opt_form, 'opt_obj': opt_obj}
 
-                        temp_dict['options'] = inner(que_obj)  # 这里必须传参，确保生成器内的question_obj一定是本次循环的que_obj
+                        # 这里必须传参，确保生成器内的question_obj一定是本次循环的que_obj
+                        temp_dict['options'] = inner(que_obj)
 
                     yield temp_dict
 
@@ -145,8 +149,8 @@ def edit(request, naire_id):
         # print(req_que_list)
 
         db_que_list = models.Question.objects.filter(questionnaire_id=naire_id)
-        db_qid_list = [i.id for i in db_que_list]
-        post_qid_list = [i['qid'] for i in req_que_list if i['qid']]
+        db_qid_list = [i.id for i in db_que_list]  # 数据库中所有问题的id
+        post_qid_list = [i['qid'] for i in req_que_list if i['qid']]  # post提交的所有问题的id
         del_qid_set = set(db_qid_list) - set(post_qid_list)  # 待删除的问题id集合
 
         res_dict = {"status": True, "error_msg": None}
@@ -198,7 +202,7 @@ def edit(request, naire_id):
                                     elif oid in db_oid_list:
                                         models.Option.objects.filter(id=oid).update(content=content, value=value)
                                     else:
-                                        # 前端"oid"被修改，不做任何操作
+                                        # 前端"oid"被恶意修改，不做任何操作
                                         pass
                             else:
                                 # 单选-->其他类型，清空选项
@@ -209,8 +213,9 @@ def edit(request, naire_id):
                                 models.Option.objects.create(content=opt_dict['content'], value=opt_dict['value'],
                                                              question_id=qid)
                     else:
-                        # 前端"qid"被修改，不做任何操作
+                        # 前端"qid"被恶意修改，不做任何操作
                         pass
+
         except Exception as e:
             res_dict['status'] = False
             res_dict['error_msg'] = str(e)
