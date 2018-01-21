@@ -6,9 +6,13 @@
 
 ​	员工登录后可以添加、编辑、删除问卷，预览功能暂未实现。
 
-​	示例如图：
+​	主页示例：
 
 ​	![示例](https://raw.githubusercontent.com/MaksimSun/questionnaire/master/screenshots/%E7%A4%BA%E4%BE%8B.png)
+
+​	编辑问卷页面示例：
+
+​	![编辑页面](https://raw.githubusercontent.com/MaksimSun/questionnaire/master/screenshots/%E7%BC%96%E8%BE%91%E9%97%AE%E5%8D%B7.png)
 
 ## 二、技术点
 

@@ -113,6 +113,7 @@ def edit(request, naire_id):
     '''
     添加、编辑问卷页面
     '''
+    username = request.session.get('userinfo').get('username')
     if not request.is_ajax():
         def outer():
             '''第一层生成器，返回每一个问题被QuestionForm处理后的对象'''
@@ -142,7 +143,7 @@ def edit(request, naire_id):
 
                     yield temp_dict
 
-        return render(request, 'edit.html', {"que_form_yield": outer()})
+        return render(request, 'edit.html', {"username": username, "que_form_yield": outer()})
 
     else:
         req_que_list = json.loads(request.body.decode())
